@@ -577,8 +577,8 @@ CREATE INDEX idx_ciclos_periodo ON ciclos_atendimento(data_inicio);
 
 **Desenvolvido por**: Fluxo TI  
 **Email**: contato@fluxoti.com  
-**Documentação**: https://docs.condoassist.com  
-**Issues**: https://github.com/seu-usuario/condoassist/issues
+**Documentação**: https://github.com/Axxia25/condoassist/edit/main/README.md
+**Issues**: https://github.com/axxia25/condoassist/issues
 
 ---
 
