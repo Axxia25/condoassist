@@ -1,9 +1,12 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/lib/supabase'
-import { startOfDay, subDays, subMonths, startOfYear, endOfDay } from 'date-fns'
+import { startOfDay, subDays, startOfYear, endOfDay } from 'date-fns'
 
 export type PeriodType = 'today' | '7days' | '30days' | '90days' | 'year' | 'custom'
+
+// Timeout para queries do Supabase (10 segundos)
+const QUERY_TIMEOUT = 10000
 
 interface DateRange {
   startDate: Date
@@ -11,9 +14,25 @@ interface DateRange {
 }
 
 /**
- * Calcula o range de datas baseado no período selecionado
+ * Helper para adicionar timeout em queries
  */
-export function getDateRangeFromPeriod(period: PeriodType, customRange?: DateRange): DateRange {
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number = QUERY_TIMEOUT
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Query timeout')), timeoutMs)
+    ),
+  ])
+}
+
+/**
+ * Calcula o range de datas baseado no período selecionado
+ * (função interna, não exportada)
+ */
+function getDateRangeFromPeriod(period: PeriodType, customRange?: DateRange): DateRange {
   const now = new Date()
 
   switch (period) {
@@ -56,15 +75,17 @@ export function getDateRangeFromPeriod(period: PeriodType, customRange?: DateRan
 }
 
 /**
- * Busca KPIs principais do dashboard (otimizado)
+ * Busca KPIs principais do dashboard (otimizado com timeout e performance tracking)
  */
 export async function getDashboardKPIs(period: PeriodType = '30days') {
+  const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
   const { startDate, endDate } = getDateRangeFromPeriod(period)
 
   try {
     // Executar todas as queries em paralelo para melhor performance
-    const [usuariosResult, buscasResult, npsResult, interacoesResult] = await Promise.allSettled([
+    const [usuariosResult, buscasResult, npsResult, interacoesResult] = await withTimeout(
+      Promise.allSettled([
       supabase
         .from('vw_usuarios_unicos_periodo')
         .select('total_usuarios')
@@ -101,6 +122,10 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
         .limit(1)
         .maybeSingle(),
     ])
+    )
+
+    const duration = performance.now() - startTime
+    console.log(`[Performance] getDashboardKPIs executou em ${duration.toFixed(2)}ms`)
 
     // Extrair dados com fallback para 0
     const usuarios = usuariosResult.status === 'fulfilled' ? usuariosResult.value.data : null
@@ -141,6 +166,7 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
  * Busca top 10 tópicos mais buscados (otimizado)
  */
 export async function getTopTopicos(period: PeriodType = '30days') {
+  const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
   const { startDate, endDate } = getDateRangeFromPeriod(period)
 
@@ -152,6 +178,10 @@ export async function getTopTopicos(period: PeriodType = '30days') {
       .lte('periodo', endDate.toISOString())
       .order('total_buscas', { ascending: false })
       .limit(10)
+      .abortSignal(AbortSignal.timeout(QUERY_TIMEOUT))
+
+    const duration = performance.now() - startTime
+    console.log(`[Performance] getTopTopicos executou em ${duration.toFixed(2)}ms`)
 
     if (error) {
       console.error('Erro ao buscar top tópicos:', error)
@@ -170,6 +200,7 @@ export async function getTopTopicos(period: PeriodType = '30days') {
  * Limita a 90 pontos para não sobrecarregar o gráfico
  */
 export async function getDemandasTimeline(period: PeriodType = '30days') {
+  const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
   const { startDate, endDate } = getDateRangeFromPeriod(period)
 
@@ -181,6 +212,10 @@ export async function getDemandasTimeline(period: PeriodType = '30days') {
       .lte('data', endDate.toISOString())
       .order('data', { ascending: true })
       .limit(90) // Limita a 90 pontos para performance
+      .abortSignal(AbortSignal.timeout(QUERY_TIMEOUT))
+
+    const duration = performance.now() - startTime
+    console.log(`[Performance] getDemandasTimeline executou em ${duration.toFixed(2)}ms`)
 
     if (error) {
       console.error('Erro ao buscar timeline de demandas:', error)
@@ -199,6 +234,7 @@ export async function getDemandasTimeline(period: PeriodType = '30days') {
  * Limita a 50 condomínios e seleciona apenas campos necessários
  */
 export async function getCondominiosStats(period: PeriodType = '30days') {
+  const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
   const { startDate, endDate } = getDateRangeFromPeriod(period)
 
@@ -210,6 +246,10 @@ export async function getCondominiosStats(period: PeriodType = '30days') {
       .lte('periodo_fim', endDate.toISOString())
       .order('total_atendimentos', { ascending: false })
       .limit(50) // Limita a 50 condomínios para performance
+      .abortSignal(AbortSignal.timeout(QUERY_TIMEOUT))
+
+    const duration = performance.now() - startTime
+    console.log(`[Performance] getCondominiosStats executou em ${duration.toFixed(2)}ms`)
 
     if (error) {
       console.error('Erro ao buscar stats de condomínios:', error)

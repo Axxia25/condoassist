@@ -100,65 +100,79 @@ export function DashboardContent({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Period Filter */}
       <PeriodFilter value={period} onChange={handlePeriodChange} />
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid com animação escalonada */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KPICard
-          title="Usuários Únicos"
-          value={kpis.usuarios.total.toLocaleString('pt-BR')}
-          change={{
-            value: kpis.usuarios.change,
-            label: 'vs. período anterior',
-          }}
-          icon={Users}
-        />
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: '0ms' }}>
+          <KPICard
+            title="Usuários Únicos"
+            value={kpis.usuarios.total.toLocaleString('pt-BR')}
+            change={{
+              value: kpis.usuarios.change,
+              label: 'vs. período anterior',
+            }}
+            icon={Users}
+          />
+        </div>
 
-        <KPICard
-          title="Buscas RAG"
-          value={kpis.buscas.total.toLocaleString('pt-BR')}
-          change={{
-            value: kpis.buscas.change,
-            label: 'vs. período anterior',
-          }}
-          icon={BarChart3}
-        />
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: '100ms' }}>
+          <KPICard
+            title="Buscas RAG"
+            value={kpis.buscas.total.toLocaleString('pt-BR')}
+            change={{
+              value: kpis.buscas.change,
+              label: 'vs. período anterior',
+            }}
+            icon={BarChart3}
+          />
+        </div>
 
-        <KPICard
-          title="NPS Médio"
-          value={kpis.nps.score.toFixed(1)}
-          change={
-            kpis.nps.total > 0
-              ? {
-                  value: 0, // TODO: Calcular mudança vs período anterior
-                  label: `${kpis.nps.total} respostas`,
-                }
-              : undefined
-          }
-          icon={ThumbsUp}
-        />
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: '200ms' }}>
+          <KPICard
+            title="NPS Médio"
+            value={kpis.nps.score.toFixed(1)}
+            change={
+              kpis.nps.total > 0
+                ? {
+                    value: 0, // TODO: Calcular mudança vs período anterior
+                    label: `${kpis.nps.total} respostas`,
+                  }
+                : undefined
+            }
+            icon={ThumbsUp}
+          />
+        </div>
 
-        <KPICard
-          title="Interações Síndicos"
-          value={kpis.interacoes.total.toLocaleString('pt-BR')}
-          change={{
-            value: kpis.interacoes.change,
-            label: 'vs. período anterior',
-          }}
-          icon={MessageSquare}
-        />
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: '300ms' }}>
+          <KPICard
+            title="Interações Síndicos"
+            value={kpis.interacoes.total.toLocaleString('pt-BR')}
+            change={{
+              value: kpis.interacoes.change,
+              label: 'vs. período anterior',
+            }}
+            icon={MessageSquare}
+          />
+        </div>
       </div>
 
-      {/* Charts */}
+      {/* Charts com animação */}
       <div className="grid gap-4 md:grid-cols-2">
-        <DemandasChart data={demandas} />
-        <TopicosChart data={topicos} />
+        <div className="animate-in fade-in slide-in-from-left-4 duration-700" style={{ animationDelay: '400ms' }}>
+          <DemandasChart data={demandas} />
+        </div>
+        <div className="animate-in fade-in slide-in-from-right-4 duration-700" style={{ animationDelay: '400ms' }}>
+          <TopicosChart data={topicos} />
+        </div>
       </div>
 
-      {/* Tabela de Condomínios */}
-      <CondominiosTable data={condominios} />
+      {/* Tabela de Condomínios com animação */}
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: '600ms' }}>
+        <CondominiosTable data={condominios} />
+      </div>
     </div>
   )
 }
