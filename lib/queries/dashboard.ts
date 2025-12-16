@@ -88,37 +88,30 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
       Promise.allSettled([
       supabase
         .from('vw_usuarios_unicos_periodo')
-        .select('total_usuarios')
-        .gte('periodo', startDate.toISOString())
-        .lte('periodo', endDate.toISOString())
-        .order('periodo', { ascending: false })
+        .select('usuarios_unicos')
+        .gte('data', startDate.toISOString())
+        .lte('data', endDate.toISOString())
+        .order('data', { ascending: false })
         .limit(1)
         .maybeSingle(),
 
       supabase
         .from('vw_buscas_paragrafos_periodo')
         .select('total_buscas')
-        .gte('periodo', startDate.toISOString())
-        .lte('periodo', endDate.toISOString())
-        .order('periodo', { ascending: false })
+        .gte('data', startDate.toISOString())
+        .lte('data', endDate.toISOString())
+        .order('data', { ascending: false })
         .limit(1)
         .maybeSingle(),
 
       supabase
         .from('vw_nps_geral')
         .select('nps_score, total_respostas')
-        .gte('data_inicio', startDate.toISOString())
-        .lte('data_fim', endDate.toISOString())
-        .order('data_fim', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .single(),
 
       supabase
         .from('vw_interacoes_sindicos')
-        .select('total_interacoes')
-        .gte('periodo', startDate.toISOString())
-        .lte('periodo', endDate.toISOString())
-        .order('periodo', { ascending: false })
+        .select('total_ciclos')
         .limit(1)
         .maybeSingle(),
     ])
@@ -135,7 +128,7 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
 
     return {
       usuarios: {
-        total: usuarios?.total_usuarios || 0,
+        total: usuarios?.usuarios_unicos || 0,
         change: 0, // TODO: Calcular comparação com período anterior
       },
       buscas: {
@@ -147,7 +140,7 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
         total: nps?.total_respostas || 0,
       },
       interacoes: {
-        total: interacoes?.total_interacoes || 0,
+        total: interacoes?.total_ciclos || 0,
         change: 0,
       },
     }
@@ -168,14 +161,11 @@ export async function getDashboardKPIs(period: PeriodType = '30days') {
 export async function getTopTopicos(period: PeriodType = '30days') {
   const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
-  const { startDate, endDate } = getDateRangeFromPeriod(period)
 
   try {
     const { data, error } = await supabase
       .from('vw_top_topicos')
       .select('topico, total_buscas')
-      .gte('periodo', startDate.toISOString())
-      .lte('periodo', endDate.toISOString())
       .order('total_buscas', { ascending: false })
       .limit(10)
       .abortSignal(AbortSignal.timeout(QUERY_TIMEOUT))
@@ -207,7 +197,7 @@ export async function getDemandasTimeline(period: PeriodType = '30days') {
   try {
     const { data, error } = await supabase
       .from('vw_demandas_atendimento')
-      .select('data, atendidas, nao_atendidas')
+      .select('data, demandas_atendidas, demandas_nao_atendidas')
       .gte('data', startDate.toISOString())
       .lte('data', endDate.toISOString())
       .order('data', { ascending: true })
@@ -236,15 +226,12 @@ export async function getDemandasTimeline(period: PeriodType = '30days') {
 export async function getCondominiosStats(period: PeriodType = '30days') {
   const startTime = performance.now()
   const supabase = await createServerSupabaseClient()
-  const { startDate, endDate } = getDateRangeFromPeriod(period)
 
   try {
     const { data, error } = await supabase
       .from('vw_dashboard_condominio')
-      .select('condominio_id, nome_condominio, total_atendimentos, nps_medio, ativo')
-      .gte('periodo_inicio', startDate.toISOString())
-      .lte('periodo_fim', endDate.toISOString())
-      .order('total_atendimentos', { ascending: false })
+      .select('condominio_id, condominio, total_ciclos, nps_medio')
+      .order('total_ciclos', { ascending: false })
       .limit(50) // Limita a 50 condomínios para performance
       .abortSignal(AbortSignal.timeout(QUERY_TIMEOUT))
 

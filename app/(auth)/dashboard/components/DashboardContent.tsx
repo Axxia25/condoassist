@@ -76,13 +76,12 @@ interface DashboardContentProps {
     interacoes: { total: number; change: number }
   }
   topicos: Array<{ topico: string; total_buscas: number }>
-  demandas: Array<{ data: string; atendidas: number; nao_atendidas: number }>
+  demandas: Array<{ data: string; demandas_atendidas: number; demandas_nao_atendidas: number }>
   condominios: Array<{
     condominio_id: number
-    nome_condominio: string
-    total_atendimentos: number
+    condominio: string
+    total_ciclos: number
     nps_medio: number
-    ativo: boolean
   }>
 }
 

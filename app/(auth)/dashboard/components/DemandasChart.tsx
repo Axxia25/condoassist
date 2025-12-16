@@ -16,8 +16,8 @@ import { ptBR } from 'date-fns/locale'
 
 interface DemandasData {
   data: string
-  atendidas: number
-  nao_atendidas: number
+  demandas_atendidas: number
+  demandas_nao_atendidas: number
 }
 
 interface DemandasChartProps {
@@ -29,8 +29,8 @@ export function DemandasChart({ data }: DemandasChartProps) {
   const chartData = data.map((item) => ({
     date: format(parseISO(item.data), 'dd/MM', { locale: ptBR }),
     fullDate: format(parseISO(item.data), 'dd/MM/yyyy', { locale: ptBR }),
-    atendidas: item.atendidas,
-    naoAtendidas: item.nao_atendidas,
+    atendidas: item.demandas_atendidas,
+    naoAtendidas: item.demandas_nao_atendidas,
   }))
 
   if (chartData.length === 0) {

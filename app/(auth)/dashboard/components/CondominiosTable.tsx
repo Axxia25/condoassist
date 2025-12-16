@@ -2,16 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Eye } from 'lucide-react'
 
 interface CondominioData {
   condominio_id: number
-  nome_condominio: string
-  total_atendimentos: number
+  condominio: string
+  total_ciclos: number
   nps_medio: number
-  ativo: boolean
 }
 
 interface CondominiosTableProps {
@@ -54,13 +52,10 @@ export function CondominiosTable({ data }: CondominiosTableProps) {
                   Condomínio
                 </th>
                 <th className="text-center p-3 text-sm font-medium text-muted-foreground">
-                  Atendimentos
+                  Ciclos
                 </th>
                 <th className="text-center p-3 text-sm font-medium text-muted-foreground">
                   NPS Médio
-                </th>
-                <th className="text-center p-3 text-sm font-medium text-muted-foreground">
-                  Status
                 </th>
                 <th className="text-center p-3 text-sm font-medium text-muted-foreground">
                   Ações
@@ -71,10 +66,10 @@ export function CondominiosTable({ data }: CondominiosTableProps) {
               {data.map((condo) => (
                 <tr key={condo.condominio_id} className="border-b last:border-0 hover:bg-muted/50">
                   <td className="p-3">
-                    <div className="font-medium">{condo.nome_condominio}</div>
+                    <div className="font-medium">{condo.condominio}</div>
                   </td>
                   <td className="p-3 text-center">
-                    <span className="text-sm">{condo.total_atendimentos}</span>
+                    <span className="text-sm">{condo.total_ciclos}</span>
                   </td>
                   <td className="p-3 text-center">
                     <div className="flex items-center justify-center gap-1">
@@ -82,11 +77,6 @@ export function CondominiosTable({ data }: CondominiosTableProps) {
                         {condo.nps_medio ? condo.nps_medio.toFixed(1) : '-'}
                       </span>
                     </div>
-                  </td>
-                  <td className="p-3 text-center">
-                    <Badge variant={condo.ativo ? 'default' : 'secondary'}>
-                      {condo.ativo ? 'Ativo' : 'Inativo'}
-                    </Badge>
                   </td>
                   <td className="p-3 text-center">
                     <Link href={`/condominios/${condo.condominio_id}`}>
